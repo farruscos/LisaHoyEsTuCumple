@@ -102,20 +102,6 @@ input[type="file"]:focus {
     box-shadow: 0 0 5px rgba(255, 107, 53, 0.3);
 }
 
-.photo-preview {
-    margin-top: 12px;
-    align-items: center;
-    gap: 12px;
-}
-
-.photo-preview img {
-    width: 72px;
-    height: 72px;
-    object-fit: cover;
-    border-radius: 50%;
-    border: 2px solid var(--accent-color);
-}
-
 .text-btn {
     border: 0;
     background: transparent;
@@ -124,6 +110,96 @@ input[type="file"]:focus {
     font-weight: 650;
     cursor: pointer;
     text-decoration: underline;
+}
+
+.text-btn:disabled {
+    color: var(--muted-color);
+    cursor: not-allowed;
+}
+
+.photo-cropper {
+    margin-top: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.crop-stage {
+    position: relative;
+    width: min(100%, 260px);
+    aspect-ratio: 1;
+    margin: 0 auto;
+    overflow: hidden;
+    border-radius: 8px;
+    background: #111;
+    border: 2px solid var(--border-color);
+    touch-action: none;
+    cursor: grab;
+    user-select: none;
+}
+
+.crop-stage.is-dragging {
+    cursor: grabbing;
+}
+
+.crop-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    max-width: none;
+    transform-origin: top left;
+    pointer-events: none;
+    user-select: none;
+}
+
+.crop-mask {
+    position: absolute;
+    inset: 0;
+    border-radius: 8px;
+    background: radial-gradient(
+        circle closest-side,
+        transparent calc(100% - 18px),
+        rgba(0, 0, 0, 0.42) calc(100% - 17px)
+    );
+    pointer-events: none;
+}
+
+.crop-mask::after {
+    content: "";
+    position: absolute;
+    inset: 18px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.95);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
+}
+
+.crop-help {
+    color: var(--muted-color);
+    font-size: 0.9em;
+    line-height: 1.4;
+}
+
+.crop-controls {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 10px;
+}
+
+.crop-controls label {
+    margin: 0;
+}
+
+.crop-controls input[type="range"] {
+    width: 100%;
+    accent-color: var(--primary-color);
+}
+
+.crop-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: space-between;
 }
 
 .btn {
@@ -229,7 +305,7 @@ input[type="file"]:focus {
 }
 
 .preview-section.is-busy::after {
-    content: "Generando vídeo...\AEsto puede tardar un rato";
+    content: "Generando vídeo...\A Esto puede tardar un rato";
     position: absolute;
     inset: 0;
     display: flex;

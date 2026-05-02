@@ -4,7 +4,10 @@ const form = document.getElementById('customizeForm');
 const customNameInput = document.getElementById('customName');
 const photoInput = document.getElementById('photoInput');
 const photoPreview = document.getElementById('photoPreview');
+const cropStage = document.getElementById('cropStage');
 const photoPreviewImage = document.getElementById('photoPreviewImage');
+const photoZoom = document.getElementById('photoZoom');
+const resetCropBtn = document.getElementById('resetCropBtn');
 const clearPhotoBtn = document.getElementById('clearPhotoBtn');
 const submitBtn = document.getElementById('submitBtn');
 const statusMessage = document.getElementById('statusMessage');
@@ -27,6 +30,8 @@ let currentDownloadName = 'cumple-personalizado.mp4';
 let currentShareUrl = null;
 let currentShareText = '';
 let currentPhotoPreviewUrl = null;
+let cropState = null;
+const CROP_OUTPUT_SIZE = 512;
 
 form.addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -44,11 +49,14 @@ form.addEventListener('submit', async (event) => {
     const hasPhoto = photoInput.files.length > 0;
 
     if (hasPhoto) {
-        formData.append('photo', photoInput.files[0]);
+        const croppedPhoto = await createCroppedPhotoBlob();
+        formData.append('photo', croppedPhoto || photoInput.files[0], 'foto-recortada.jpg');
     }
 
     submitBtn.disabled = true;
     photoInput.disabled = true;
+    photoZoom.disabled = true;
+    resetCropBtn.disabled = true;
     setPreviewBusy(true);
     showStatus(
         hasPhoto
@@ -103,6 +111,8 @@ form.addEventListener('submit', async (event) => {
     } finally {
         submitBtn.disabled = false;
         photoInput.disabled = false;
+        photoZoom.disabled = false;
+        resetCropBtn.disabled = false;
         setPreviewBusy(false);
     }
 });
@@ -116,6 +126,7 @@ photoInput.addEventListener('change', () => {
     if (photoInput.files.length === 0) {
         photoPreview.style.display = 'none';
         photoPreviewImage.removeAttribute('src');
+        cropState = null;
         return;
     }
 
@@ -124,9 +135,74 @@ photoInput.addEventListener('change', () => {
     photoPreview.style.display = 'flex';
 });
 
+photoPreviewImage.addEventListener('load', () => {
+    resetCrop();
+});
+
+photoZoom.addEventListener('input', () => {
+    if (!cropState) {
+        return;
+    }
+
+    const previousZoom = cropState.zoom;
+    const nextZoom = Number(photoZoom.value);
+    const scaleBefore = cropState.baseScale * previousZoom;
+    const scaleAfter = cropState.baseScale * nextZoom;
+    const center = cropState.stageSize / 2;
+    const imageCenterX = (center - cropState.offsetX) / scaleBefore;
+    const imageCenterY = (center - cropState.offsetY) / scaleBefore;
+
+    cropState.zoom = nextZoom;
+    cropState.offsetX = center - imageCenterX * scaleAfter;
+    cropState.offsetY = center - imageCenterY * scaleAfter;
+    updateCropImage();
+});
+
+resetCropBtn.addEventListener('click', () => {
+    resetCrop();
+});
+
 clearPhotoBtn.addEventListener('click', () => {
     photoInput.value = '';
     photoInput.dispatchEvent(new Event('change'));
+});
+
+cropStage.addEventListener('pointerdown', (event) => {
+    if (!cropState) {
+        return;
+    }
+
+    cropState.isDragging = true;
+    cropState.dragStartX = event.clientX;
+    cropState.dragStartY = event.clientY;
+    cropState.dragOffsetX = cropState.offsetX;
+    cropState.dragOffsetY = cropState.offsetY;
+    cropStage.setPointerCapture(event.pointerId);
+    cropStage.classList.add('is-dragging');
+});
+
+cropStage.addEventListener('pointermove', (event) => {
+    if (!cropState || !cropState.isDragging) {
+        return;
+    }
+
+    cropState.offsetX = cropState.dragOffsetX + event.clientX - cropState.dragStartX;
+    cropState.offsetY = cropState.dragOffsetY + event.clientY - cropState.dragStartY;
+    updateCropImage();
+});
+
+cropStage.addEventListener('pointerup', (event) => {
+    finishCropDrag(event.pointerId);
+});
+
+cropStage.addEventListener('pointercancel', (event) => {
+    finishCropDrag(event.pointerId);
+});
+
+window.addEventListener('resize', () => {
+    if (photoPreview.style.display !== 'none' && photoPreviewImage.complete) {
+        resetCrop();
+    }
 });
 
 nativeShareBtn.addEventListener('click', async () => {
@@ -239,6 +315,106 @@ function showStatus(message, type) {
             statusMessage.classList.remove('show');
         }, 5000);
     }
+}
+
+function resetCrop() {
+    if (!photoPreviewImage.naturalWidth || !photoPreviewImage.naturalHeight) {
+        cropState = null;
+        return;
+    }
+
+    const stageSize = cropStage.getBoundingClientRect().width;
+    const baseScale = Math.max(
+        stageSize / photoPreviewImage.naturalWidth,
+        stageSize / photoPreviewImage.naturalHeight
+    );
+
+    cropState = {
+        stageSize,
+        baseScale,
+        zoom: 1,
+        offsetX: (stageSize - photoPreviewImage.naturalWidth * baseScale) / 2,
+        offsetY: (stageSize - photoPreviewImage.naturalHeight * baseScale) / 2,
+        isDragging: false,
+        dragStartX: 0,
+        dragStartY: 0,
+        dragOffsetX: 0,
+        dragOffsetY: 0,
+    };
+
+    photoZoom.value = '1';
+    updateCropImage();
+}
+
+function updateCropImage() {
+    if (!cropState) {
+        return;
+    }
+
+    const displayWidth = photoPreviewImage.naturalWidth * cropState.baseScale * cropState.zoom;
+    const displayHeight = photoPreviewImage.naturalHeight * cropState.baseScale * cropState.zoom;
+
+    cropState.offsetX = clampOffset(cropState.offsetX, displayWidth, cropState.stageSize);
+    cropState.offsetY = clampOffset(cropState.offsetY, displayHeight, cropState.stageSize);
+
+    photoPreviewImage.style.width = `${displayWidth}px`;
+    photoPreviewImage.style.height = `${displayHeight}px`;
+    photoPreviewImage.style.transform = `translate(${cropState.offsetX}px, ${cropState.offsetY}px)`;
+}
+
+function clampOffset(offset, displaySize, stageSize) {
+    if (displaySize <= stageSize) {
+        return (stageSize - displaySize) / 2;
+    }
+
+    return Math.min(0, Math.max(stageSize - displaySize, offset));
+}
+
+function finishCropDrag(pointerId) {
+    if (!cropState) {
+        return;
+    }
+
+    cropState.isDragging = false;
+    if (cropStage.hasPointerCapture(pointerId)) {
+        cropStage.releasePointerCapture(pointerId);
+    }
+    cropStage.classList.remove('is-dragging');
+}
+
+function createCroppedPhotoBlob() {
+    if (!cropState || !photoPreviewImage.naturalWidth || !photoPreviewImage.naturalHeight) {
+        return Promise.resolve(null);
+    }
+
+    const scale = cropState.baseScale * cropState.zoom;
+    const sourceX = Math.max(0, -cropState.offsetX / scale);
+    const sourceY = Math.max(0, -cropState.offsetY / scale);
+    const sourceSize = cropState.stageSize / scale;
+    const canvas = document.createElement('canvas');
+    canvas.width = CROP_OUTPUT_SIZE;
+    canvas.height = CROP_OUTPUT_SIZE;
+
+    const context = canvas.getContext('2d');
+    context.drawImage(
+        photoPreviewImage,
+        sourceX,
+        sourceY,
+        sourceSize,
+        sourceSize,
+        0,
+        0,
+        CROP_OUTPUT_SIZE,
+        CROP_OUTPUT_SIZE
+    );
+
+    return new Promise((resolve) => {
+        canvas.toBlob(
+            (blob) => resolve(blob),
+            'image/jpeg',
+            0.92
+        );
+    });
 }
 
 function formatDate(value) {

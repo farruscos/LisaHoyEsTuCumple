@@ -27,6 +27,8 @@ class VideoProcessor:
 
         self.track_path = track_path or os.path.join(self.app_dir, DEFAULT_TRACK_FILE)
         self.face_track = self._load_face_track()
+        self.ffmpeg_preset = os.environ.get("VIDEO_FFMPEG_PRESET", "ultrafast")
+        self.video_crf = os.environ.get("VIDEO_CRF", "23")
         self.video_loaded = False
         self.original_video = None
         self.video_info = None
@@ -267,9 +269,9 @@ class VideoProcessor:
             "-c:v",
             "libx264",
             "-preset",
-            "veryfast",
+            self.ffmpeg_preset,
             "-crf",
-            "23",
+            self.video_crf,
             "-pix_fmt",
             "yuv420p",
             "-t",

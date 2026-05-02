@@ -162,6 +162,17 @@ python tools\calibrate_face_track.py
 
 The script writes annotated frames to `calibration_clips/video_face_track/`, which is ignored by Git.
 
+## Video Performance
+
+When a photo is uploaded, the app has to re-encode the video to apply the overlay. By default it uses FFmpeg/x264 with the `ultrafast` preset to reduce generation time:
+
+```text
+VIDEO_FFMPEG_PRESET=ultrafast
+VIDEO_CRF=23
+```
+
+`ultrafast` is quicker but creates larger MP4 files. If you prefer smaller files and can accept slower generation, set `VIDEO_FFMPEG_PRESET=veryfast` or `medium`.
+
 ## Project Structure
 
 ```text
