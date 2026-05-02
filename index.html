@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lisa Hoy Es Tu Cumple - Name Replacer</title>
+    <link rel="stylesheet" href="style.css?v=2">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Lisa Hoy Es Tu Cumple</h1>
+            <p>Replace "Lisa" in the song with any name.</p>
+        </header>
+
+        <main>
+            <div class="form-section">
+                <form id="customizeForm">
+                    <div class="form-group">
+                        <label for="customName">Enter a name:</label>
+                        <input
+                            type="text"
+                            id="customName"
+                            name="customName"
+                            placeholder="e.g., Maria, Juan, Sofia..."
+                            required
+                            maxlength="30"
+                        >
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        Generate custom audio
+                    </button>
+                </form>
+
+                <div id="statusMessage" class="status-message"></div>
+            </div>
+
+            <div class="preview-section">
+                <h2>Your Custom Audio</h2>
+                <div id="audioContainer" class="audio-container" style="display: none;">
+                    <audio id="audioPlayer" controls>
+                        Your browser does not support the audio element.
+                    </audio>
+                    <a id="downloadBtn" href="#" download="customized-audio.mp3" class="btn btn-secondary">Download</a>
+                </div>
+                <div id="noAudio" class="no-audio">
+                    <p>Your customized audio will appear here</p>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>&copy; 2026 Audio Customization App</p>
+        </footer>
+    </div>
+
+    <script src="script.js?v=2"></script>
+</body>
+</html>
