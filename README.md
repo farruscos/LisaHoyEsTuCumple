@@ -89,7 +89,7 @@ http://localhost:10000
 
 Render can deploy this repository as a Docker web service and provide a public `onrender.com` URL.
 
-Recommended setup with R2:
+Recommended setup with R2 as the source audio:
 
 1. In Cloudflare R2, make the object available through either:
    - a public development `r2.dev` URL, or
@@ -105,7 +105,42 @@ Recommended setup with R2:
 
 6. Deploy.
 
-You no longer need a Render persistent disk if `AUDIO_URL` is set.
+You do not need a Render persistent disk if `AUDIO_URL` is set.
+
+## Share Links With 24-Hour Persistence
+
+If R2 write credentials are configured, generated MP3 files are uploaded to R2 and the app returns a share link like:
+
+```text
+https://your-render-service.onrender.com/s/<id>
+```
+
+Set these Render environment variables:
+
+```text
+R2_BUCKET=lisa
+R2_ACCESS_KEY_ID=<your R2 access key>
+R2_SECRET_ACCESS_KEY=<your R2 secret key>
+R2_ACCOUNT_ID=<your Cloudflare account id>
+SHARE_TTL_HOURS=24
+PUBLIC_BASE_URL=https://your-render-service.onrender.com
+```
+
+Alternatively, use `R2_ENDPOINT_URL` instead of `R2_ACCOUNT_ID`:
+
+```text
+R2_ENDPOINT_URL=https://<account-id>.r2.cloudflarestorage.com
+```
+
+Generated files are stored under this R2 prefix:
+
+```text
+generated/
+```
+
+The app rejects expired share links after `SHARE_TTL_HOURS`. To physically delete old MP3 files from R2, add a Cloudflare R2 lifecycle rule that deletes objects under `generated/` after 1 day.
+
+If these R2 write variables are missing, the app still works, but it returns the generated MP3 directly and share links are not created.
 
 Do not upload copyrighted audio to GitHub. Keep the source audio outside the repo and only use audio you have permission to publish or serve.
 
@@ -124,6 +159,7 @@ LisaHoyEsTuCumple/
 |-- run_app.bat
 |-- setup_venv.bat
 |-- requirements.txt
+|-- requirements-render.txt
 `-- README.md
 ```
 

@@ -9,9 +9,18 @@ const audioPlayer = document.getElementById('audioPlayer');
 const downloadBtn = document.getElementById('downloadBtn');
 const noAudio = document.getElementById('noAudio');
 const previewSection = document.querySelector('.preview-section');
+const shareContainer = document.getElementById('shareContainer');
+const nativeShareBtn = document.getElementById('nativeShareBtn');
+const copyShareBtn = document.getElementById('copyShareBtn');
+const whatsappShareBtn = document.getElementById('whatsappShareBtn');
+const xShareBtn = document.getElementById('xShareBtn');
+const facebookShareBtn = document.getElementById('facebookShareBtn');
+const shareExpiry = document.getElementById('shareExpiry');
 
 let currentAudioUrl = null;
-let currentDownloadName = 'customized-audio.mp3';
+let currentDownloadName = 'cumple-personalizado.mp3';
+let currentShareUrl = null;
+let currentShareText = '';
 
 form.addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -19,13 +28,13 @@ form.addEventListener('submit', async (event) => {
     const customName = customNameInput.value.trim();
 
     if (!customName) {
-        showStatus('Please enter a name.', 'error');
+        showStatus('Introduce un nombre.', 'error');
         return;
     }
 
     submitBtn.disabled = true;
     setPreviewBusy(true);
-    showStatus(`Creating custom audio with "${customName}"...`, 'loading');
+    showStatus(`Generando el audio para "${customName}"...`, 'loading');
 
     try {
         const response = await fetch(`${API_BASE_URL}/generate`, {
@@ -38,25 +47,38 @@ form.addEventListener('submit', async (event) => {
 
         if (!response.ok) {
             const error = await response.json();
-            throw new Error(error.error || 'Failed to generate audio');
+            throw new Error(error.error || 'No se pudo generar el audio');
         }
 
-        const blob = await response.blob();
+        const contentType = response.headers.get('Content-Type') || '';
 
-        if (currentAudioUrl) {
-            URL.revokeObjectURL(currentAudioUrl);
+        if (contentType.includes('application/json')) {
+            const payload = await response.json();
+            loadGeneratedAudio({
+                audioUrl: payload.audio_url,
+                downloadUrl: payload.download_url || payload.audio_url,
+                downloadName: payload.download_name || `cumple-${customName.toLowerCase()}.mp3`,
+                shareUrl: payload.share_url,
+                expiresAt: payload.expires_at,
+                customName,
+            });
+        } else {
+            const blob = await response.blob();
+
+            if (currentAudioUrl && currentAudioUrl.startsWith('blob:')) {
+                URL.revokeObjectURL(currentAudioUrl);
+            }
+
+            const audioUrl = URL.createObjectURL(blob);
+            loadGeneratedAudio({
+                audioUrl,
+                downloadUrl: audioUrl,
+                downloadName: `cumple-${customName.toLowerCase()}.mp3`,
+                customName,
+            });
         }
 
-        currentAudioUrl = URL.createObjectURL(blob);
-        currentDownloadName = `customized-${customName.toLowerCase()}.mp3`;
-        audioPlayer.src = currentAudioUrl;
-        audioContainer.style.display = 'flex';
-        noAudio.style.display = 'none';
-
-        downloadBtn.href = currentAudioUrl;
-        downloadBtn.download = currentDownloadName;
-
-        showStatus(`Audio created successfully. Now playing with "${customName}".`, 'success');
+        showStatus(`Audio creado correctamente para "${customName}".`, 'success');
     } catch (error) {
         console.error('Error:', error);
         showStatus(`Error: ${error.message}`, 'error');
@@ -65,6 +87,74 @@ form.addEventListener('submit', async (event) => {
         setPreviewBusy(false);
     }
 });
+
+nativeShareBtn.addEventListener('click', async () => {
+    if (!currentShareUrl || !navigator.share) {
+        return;
+    }
+
+    try {
+        await navigator.share({
+            title: 'Lisa Hoy Es Tu Cumple',
+            text: currentShareText,
+            url: currentShareUrl,
+        });
+    } catch (error) {
+        if (error.name !== 'AbortError') {
+            showStatus('No se pudo abrir el panel de compartir.', 'error');
+        }
+    }
+});
+
+copyShareBtn.addEventListener('click', async () => {
+    if (!currentShareUrl) {
+        return;
+    }
+
+    try {
+        await navigator.clipboard.writeText(currentShareUrl);
+        showStatus('Enlace copiado al portapapeles.', 'success');
+    } catch {
+        showStatus('No se pudo copiar el enlace.', 'error');
+    }
+});
+
+function loadGeneratedAudio({ audioUrl, downloadUrl, downloadName, shareUrl, expiresAt, customName }) {
+    if (currentAudioUrl && currentAudioUrl.startsWith('blob:') && currentAudioUrl !== audioUrl) {
+        URL.revokeObjectURL(currentAudioUrl);
+    }
+
+    currentAudioUrl = audioUrl;
+    currentDownloadName = downloadName;
+    currentShareUrl = shareUrl || null;
+    currentShareText = `Escucha mi audio personalizado de cumpleaños para ${customName}.`;
+
+    audioPlayer.src = currentAudioUrl;
+    audioContainer.style.display = 'flex';
+    noAudio.style.display = 'none';
+
+    downloadBtn.href = downloadUrl;
+    downloadBtn.download = currentDownloadName;
+
+    updateShareControls(expiresAt);
+}
+
+function updateShareControls(expiresAt) {
+    if (!currentShareUrl) {
+        shareContainer.style.display = 'none';
+        return;
+    }
+
+    const encodedUrl = encodeURIComponent(currentShareUrl);
+    const encodedText = encodeURIComponent(currentShareText);
+
+    whatsappShareBtn.href = `https://wa.me/?text=${encodedText}%20${encodedUrl}`;
+    xShareBtn.href = `https://twitter.com/intent/tweet?text=${encodedText}&url=${encodedUrl}`;
+    facebookShareBtn.href = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
+    nativeShareBtn.style.display = navigator.share ? 'inline-flex' : 'none';
+    shareExpiry.textContent = expiresAt ? `El enlace estará disponible hasta ${formatDate(expiresAt)}.` : '';
+    shareContainer.style.display = 'block';
+}
 
 function setPreviewBusy(isBusy) {
     previewSection.classList.toggle('is-busy', isBusy);
@@ -78,6 +168,7 @@ function setPreviewBusy(isBusy) {
         downloadBtn.removeAttribute('href');
         downloadBtn.setAttribute('aria-disabled', 'true');
         downloadBtn.setAttribute('tabindex', '-1');
+        shareContainer.classList.add('is-disabled');
     } else {
         audioPlayer.setAttribute('controls', '');
 
@@ -93,6 +184,7 @@ function setPreviewBusy(isBusy) {
 
         downloadBtn.removeAttribute('aria-disabled');
         downloadBtn.removeAttribute('tabindex');
+        shareContainer.classList.remove('is-disabled');
     }
 }
 
@@ -107,5 +199,13 @@ function showStatus(message, type) {
     }
 }
 
+function formatDate(value) {
+    return new Intl.DateTimeFormat('es-ES', {
+        dateStyle: 'short',
+        timeStyle: 'short',
+    }).format(new Date(value));
+}
+
 noAudio.style.display = 'block';
 audioContainer.style.display = 'none';
+shareContainer.style.display = 'none';

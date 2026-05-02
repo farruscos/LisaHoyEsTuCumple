@@ -1,53 +1,66 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lisa Hoy Es Tu Cumple - Name Replacer</title>
-    <link rel="stylesheet" href="style.css?v=2">
+    <title>Lisa Hoy Es Tu Cumple - Audio personalizado</title>
+    <link rel="stylesheet" href="/style.css?v=4">
 </head>
 <body>
     <div class="container">
         <header>
             <h1>Lisa Hoy Es Tu Cumple</h1>
-            <p>Replace "Lisa" in the song with any name.</p>
+            <p>Cambia "Lisa" por el nombre que quieras y genera tu audio personalizado.</p>
         </header>
 
         <main>
-            <div class="form-section">
+            <section class="form-section" aria-labelledby="formTitle">
+                <h2 id="formTitle">Crear audio</h2>
                 <form id="customizeForm">
                     <div class="form-group">
-                        <label for="customName">Enter a name:</label>
+                        <label for="customName">Nombre:</label>
                         <input
                             type="text"
                             id="customName"
                             name="customName"
-                            placeholder="e.g., Maria, Juan, Sofia..."
+                            placeholder="Por ejemplo: Maria, Juan, Sofia..."
                             required
                             maxlength="30"
+                            autocomplete="given-name"
                         >
                     </div>
 
                     <button type="submit" class="btn btn-primary" id="submitBtn">
-                        Generate custom audio
+                        Generar audio personalizado
                     </button>
                 </form>
 
-                <div id="statusMessage" class="status-message"></div>
-            </div>
+                <div id="statusMessage" class="status-message" role="status" aria-live="polite"></div>
+            </section>
 
-            <div class="preview-section">
-                <h2>Your Custom Audio</h2>
+            <section class="preview-section" aria-labelledby="previewTitle">
+                <h2 id="previewTitle">Tu audio</h2>
                 <div id="audioContainer" class="audio-container" style="display: none;">
                     <audio id="audioPlayer" controls>
-                        Your browser does not support the audio element.
+                        Tu navegador no soporta el reproductor de audio.
                     </audio>
-                    <a id="downloadBtn" href="#" download="customized-audio.mp3" class="btn btn-secondary">Download</a>
+                    <a id="downloadBtn" href="#" download="cumple-personalizado.mp3" class="btn btn-secondary">Descargar MP3</a>
+                </div>
+                <div id="shareContainer" class="share-container" style="display: none;">
+                    <p class="share-title">Compartir este resultado</p>
+                    <div class="share-actions">
+                        <button type="button" class="share-btn" id="nativeShareBtn">Compartir</button>
+                        <button type="button" class="share-btn" id="copyShareBtn">Copiar enlace</button>
+                        <a class="share-btn" id="whatsappShareBtn" href="#" target="_blank" rel="noopener">WhatsApp</a>
+                        <a class="share-btn" id="xShareBtn" href="#" target="_blank" rel="noopener">X</a>
+                        <a class="share-btn" id="facebookShareBtn" href="#" target="_blank" rel="noopener">Facebook</a>
+                    </div>
+                    <p class="share-note" id="shareExpiry"></p>
                 </div>
                 <div id="noAudio" class="no-audio">
-                    <p>Your customized audio will appear here</p>
+                    <p>Aquí aparecerá tu audio personalizado.</p>
                 </div>
-            </div>
+            </section>
         </main>
 
         <footer>
@@ -55,6 +68,6 @@
         </footer>
     </div>
 
-    <script src="script.js?v=2"></script>
+    <script src="/script.js?v=4"></script>
 </body>
 </html>
