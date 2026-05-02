@@ -50,6 +50,7 @@ Thumbs.db
 output/
 calibration_clips/
 audio_work_*/
+video_work_*/
 diagnostics_*
 test_output.*
 output_demo.*

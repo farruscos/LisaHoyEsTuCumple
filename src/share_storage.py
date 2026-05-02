@@ -92,3 +92,28 @@ class ShareStorage:
             )
         except (BotoCoreError, ClientError) as exc:
             raise FileNotFoundError(str(exc)) from exc
+
+    def video_object_key(self, share_id):
+        return f"{GENERATED_PREFIX}/video/{share_id}.mp4"
+
+    def upload_video(self, share_id, video_bytes, expires_at, custom_name):
+        self.client.put_object(
+            Bucket=self.bucket,
+            Key=self.video_object_key(share_id),
+            Body=video_bytes,
+            ContentType="video/mp4",
+            CacheControl="private, max-age=86400",
+            Metadata={
+                "expires_at": expires_at.isoformat(),
+                "custom_name": custom_name[:80],
+            },
+        )
+
+    def get_video(self, share_id):
+        try:
+            return self.client.get_object(
+                Bucket=self.bucket,
+                Key=self.video_object_key(share_id),
+            )
+        except (BotoCoreError, ClientError) as exc:
+            raise FileNotFoundError(str(exc)) from exc

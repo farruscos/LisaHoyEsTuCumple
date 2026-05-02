@@ -3,7 +3,7 @@ setlocal enabledelayedexpansion
 
 echo.
 echo ========================================
-echo Running Audio App
+echo Running Video App
 echo ========================================
 echo.
 
@@ -30,10 +30,16 @@ if errorlevel 1 (
 echo [OK] Virtual environment activated
 echo.
 
-REM Check for song.mp3
+REM Check for local media when environment URLs are not set.
 if not exist song.mp3 (
     echo WARNING: song.mp3 not found!
-    echo Please extract audio first: python extract_audio.py
+    echo Set AUDIO_URL or extract audio first: python extract_audio.py
+    echo.
+)
+
+if not exist "Lisa hoy es tu cumple - YouTube.mp4" (
+    echo WARNING: source MP4 not found locally.
+    echo Set VIDEO_URL in deployment or place the base MP4 in the project root for local testing.
     echo.
 )
 

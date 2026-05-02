@@ -3,27 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Audio personalizado - Lisa Hoy Es Tu Cumple</title>
+    <title>Vídeo personalizado - Lisa Hoy Es Tu Cumple</title>
     <link rel="stylesheet" href="/style.css?v=5">
 </head>
 <body>
     <div class="container">
         <header>
             <h1>Lisa Hoy Es Tu Cumple</h1>
-            <p>Alguien ha creado este audio personalizado para compartirlo contigo.</p>
+            <p>Alguien ha creado este vídeo personalizado para compartirlo contigo.</p>
         </header>
 
         <main class="shared-main">
             <section class="preview-section shared-card" aria-labelledby="sharedTitle">
-                <h2 id="sharedTitle">Audio personalizado</h2>
+                <h2 id="sharedTitle">Vídeo personalizado</h2>
                 <div id="sharedStatus" class="status-message show loading" role="status" aria-live="polite">
-                    Cargando audio...
+                    Cargando vídeo...
                 </div>
-                <div id="sharedAudioContainer" class="audio-container" style="display: none;">
-                    <audio id="sharedAudioPlayer" controls>
-                        Tu navegador no soporta el reproductor de audio.
-                    </audio>
-                    <a id="sharedDownloadBtn" href="#" class="btn btn-secondary">Descargar MP3</a>
+                <div id="sharedVideoContainer" class="video-container" style="display: none;">
+                    <video id="sharedVideoPlayer" controls playsinline>
+                        Tu navegador no soporta el reproductor de vídeo.
+                    </video>
+                    <a id="sharedDownloadBtn" href="#" class="btn btn-secondary">Descargar MP4</a>
                 </div>
                 <div id="sharedShareContainer" class="share-container" style="display: none;">
                     <p class="share-title">Compartir este enlace</p>
@@ -36,7 +36,7 @@
                     </div>
                     <p class="share-note" id="sharedExpiry"></p>
                 </div>
-                <a class="btn btn-primary" href="/">Crear otro audio</a>
+                <a class="btn btn-primary" href="/">Crear otro vídeo</a>
             </section>
         </main>
 
@@ -45,6 +45,6 @@
         </footer>
     </div>
 
-    <script src="/share.js?v=5"></script>
+    <script src="/video-share.js?v=5"></script>
 </body>
 </html>

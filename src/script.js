@@ -2,12 +2,16 @@ const API_BASE_URL = '/api';
 
 const form = document.getElementById('customizeForm');
 const customNameInput = document.getElementById('customName');
+const photoInput = document.getElementById('photoInput');
+const photoPreview = document.getElementById('photoPreview');
+const photoPreviewImage = document.getElementById('photoPreviewImage');
+const clearPhotoBtn = document.getElementById('clearPhotoBtn');
 const submitBtn = document.getElementById('submitBtn');
 const statusMessage = document.getElementById('statusMessage');
-const audioContainer = document.getElementById('audioContainer');
-const audioPlayer = document.getElementById('audioPlayer');
+const videoContainer = document.getElementById('videoContainer');
+const videoPlayer = document.getElementById('videoPlayer');
 const downloadBtn = document.getElementById('downloadBtn');
-const noAudio = document.getElementById('noAudio');
+const noVideo = document.getElementById('noVideo');
 const previewSection = document.querySelector('.preview-section');
 const shareContainer = document.getElementById('shareContainer');
 const nativeShareBtn = document.getElementById('nativeShareBtn');
@@ -17,10 +21,12 @@ const xShareBtn = document.getElementById('xShareBtn');
 const facebookShareBtn = document.getElementById('facebookShareBtn');
 const shareExpiry = document.getElementById('shareExpiry');
 
-let currentAudioUrl = null;
-let currentDownloadName = 'cumple-personalizado.mp3';
+let currentVideoUrl = null;
+let currentDownloadUrl = null;
+let currentDownloadName = 'cumple-personalizado.mp4';
 let currentShareUrl = null;
 let currentShareText = '';
+let currentPhotoPreviewUrl = null;
 
 form.addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -32,32 +38,44 @@ form.addEventListener('submit', async (event) => {
         return;
     }
 
+    const formData = new FormData();
+    formData.append('name', customName);
+
+    const hasPhoto = photoInput.files.length > 0;
+
+    if (hasPhoto) {
+        formData.append('photo', photoInput.files[0]);
+    }
+
     submitBtn.disabled = true;
+    photoInput.disabled = true;
     setPreviewBusy(true);
-    showStatus(`Generando el audio para "${customName}"...`, 'loading');
+    showStatus(
+        hasPhoto
+            ? `Generando el vídeo para "${customName}". La foto tarda un poco más; deja esta pestaña abierta.`
+            : `Generando el vídeo para "${customName}". Puede tardar unos segundos.`,
+        'loading'
+    );
 
     try {
-        const response = await fetch(`${API_BASE_URL}/generate`, {
+        const response = await fetch(`${API_BASE_URL}/generate-video`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ name: customName }),
+            body: formData,
         });
 
         if (!response.ok) {
             const error = await response.json();
-            throw new Error(error.error || 'No se pudo generar el audio');
+            throw new Error(error.error || 'No se pudo generar el vídeo');
         }
 
         const contentType = response.headers.get('Content-Type') || '';
 
         if (contentType.includes('application/json')) {
             const payload = await response.json();
-            loadGeneratedAudio({
-                audioUrl: payload.audio_url,
-                downloadUrl: payload.download_url || payload.audio_url,
-                downloadName: payload.download_name || `cumple-${customName.toLowerCase()}.mp3`,
+            loadGeneratedVideo({
+                videoUrl: payload.video_url,
+                downloadUrl: payload.download_url || payload.video_url,
+                downloadName: payload.download_name || `cumple-${slugify(customName)}.mp4`,
                 shareUrl: payload.share_url,
                 expiresAt: payload.expires_at,
                 customName,
@@ -65,27 +83,50 @@ form.addEventListener('submit', async (event) => {
         } else {
             const blob = await response.blob();
 
-            if (currentAudioUrl && currentAudioUrl.startsWith('blob:')) {
-                URL.revokeObjectURL(currentAudioUrl);
+            if (currentVideoUrl && currentVideoUrl.startsWith('blob:')) {
+                URL.revokeObjectURL(currentVideoUrl);
             }
 
-            const audioUrl = URL.createObjectURL(blob);
-            loadGeneratedAudio({
-                audioUrl,
-                downloadUrl: audioUrl,
-                downloadName: `cumple-${customName.toLowerCase()}.mp3`,
+            const videoUrl = URL.createObjectURL(blob);
+            loadGeneratedVideo({
+                videoUrl,
+                downloadUrl: videoUrl,
+                downloadName: `cumple-${slugify(customName)}.mp4`,
                 customName,
             });
         }
 
-        showStatus(`Audio creado correctamente para "${customName}".`, 'success');
+        showStatus(`Vídeo creado correctamente para "${customName}".`, 'success');
     } catch (error) {
         console.error('Error:', error);
         showStatus(`Error: ${error.message}`, 'error');
     } finally {
         submitBtn.disabled = false;
+        photoInput.disabled = false;
         setPreviewBusy(false);
     }
+});
+
+photoInput.addEventListener('change', () => {
+    if (currentPhotoPreviewUrl) {
+        URL.revokeObjectURL(currentPhotoPreviewUrl);
+        currentPhotoPreviewUrl = null;
+    }
+
+    if (photoInput.files.length === 0) {
+        photoPreview.style.display = 'none';
+        photoPreviewImage.removeAttribute('src');
+        return;
+    }
+
+    currentPhotoPreviewUrl = URL.createObjectURL(photoInput.files[0]);
+    photoPreviewImage.src = currentPhotoPreviewUrl;
+    photoPreview.style.display = 'flex';
+});
+
+clearPhotoBtn.addEventListener('click', () => {
+    photoInput.value = '';
+    photoInput.dispatchEvent(new Event('change'));
 });
 
 nativeShareBtn.addEventListener('click', async () => {
@@ -119,21 +160,22 @@ copyShareBtn.addEventListener('click', async () => {
     }
 });
 
-function loadGeneratedAudio({ audioUrl, downloadUrl, downloadName, shareUrl, expiresAt, customName }) {
-    if (currentAudioUrl && currentAudioUrl.startsWith('blob:') && currentAudioUrl !== audioUrl) {
-        URL.revokeObjectURL(currentAudioUrl);
+function loadGeneratedVideo({ videoUrl, downloadUrl, downloadName, shareUrl, expiresAt, customName }) {
+    if (currentVideoUrl && currentVideoUrl.startsWith('blob:') && currentVideoUrl !== videoUrl) {
+        URL.revokeObjectURL(currentVideoUrl);
     }
 
-    currentAudioUrl = audioUrl;
+    currentVideoUrl = videoUrl;
+    currentDownloadUrl = downloadUrl || videoUrl;
     currentDownloadName = downloadName;
     currentShareUrl = shareUrl || null;
-    currentShareText = `Escucha mi audio personalizado de cumpleaños para ${customName}.`;
+    currentShareText = `Mira mi vídeo personalizado de cumpleaños para ${customName}.`;
 
-    audioPlayer.src = currentAudioUrl;
-    audioContainer.style.display = 'flex';
-    noAudio.style.display = 'none';
+    videoPlayer.src = currentVideoUrl;
+    videoContainer.style.display = 'flex';
+    noVideo.style.display = 'none';
 
-    downloadBtn.href = downloadUrl;
+    downloadBtn.href = currentDownloadUrl;
     downloadBtn.download = currentDownloadName;
 
     updateShareControls(expiresAt);
@@ -161,24 +203,24 @@ function setPreviewBusy(isBusy) {
     previewSection.setAttribute('aria-busy', String(isBusy));
 
     if (isBusy) {
-        audioPlayer.pause();
-        audioPlayer.removeAttribute('controls');
-        audioPlayer.removeAttribute('src');
-        audioPlayer.load();
+        videoPlayer.pause();
+        videoPlayer.removeAttribute('controls');
+        videoPlayer.removeAttribute('src');
+        videoPlayer.load();
         downloadBtn.removeAttribute('href');
         downloadBtn.setAttribute('aria-disabled', 'true');
         downloadBtn.setAttribute('tabindex', '-1');
         shareContainer.classList.add('is-disabled');
     } else {
-        audioPlayer.setAttribute('controls', '');
+        videoPlayer.setAttribute('controls', '');
 
-        if (currentAudioUrl && !audioPlayer.getAttribute('src')) {
-            audioPlayer.src = currentAudioUrl;
-            audioPlayer.load();
+        if (currentVideoUrl && !videoPlayer.getAttribute('src')) {
+            videoPlayer.src = currentVideoUrl;
+            videoPlayer.load();
         }
 
-        if (currentAudioUrl) {
-            downloadBtn.href = currentAudioUrl;
+        if (currentDownloadUrl) {
+            downloadBtn.href = currentDownloadUrl;
             downloadBtn.download = currentDownloadName;
         }
 
@@ -206,6 +248,15 @@ function formatDate(value) {
     }).format(new Date(value));
 }
 
-noAudio.style.display = 'block';
-audioContainer.style.display = 'none';
+function slugify(value) {
+    return value
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '') || 'personalizado';
+}
+
+noVideo.style.display = 'block';
+videoContainer.style.display = 'none';
 shareContainer.style.display = 'none';

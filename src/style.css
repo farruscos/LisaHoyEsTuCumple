@@ -63,7 +63,7 @@ main {
 .preview-section {
     background: white;
     padding: 30px;
-    border-radius: 10px;
+    border-radius: 8px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
 
@@ -84,19 +84,46 @@ label {
     color: var(--secondary-color);
 }
 
-input[type="text"] {
+input[type="text"],
+input[type="file"] {
     width: 100%;
     padding: 12px;
     border: 2px solid var(--border-color);
     border-radius: 5px;
     font-size: 1em;
     transition: border-color 0.3s;
+    background: #fff;
 }
 
-input[type="text"]:focus {
+input[type="text"]:focus,
+input[type="file"]:focus {
     outline: none;
     border-color: var(--primary-color);
     box-shadow: 0 0 5px rgba(255, 107, 53, 0.3);
+}
+
+.photo-preview {
+    margin-top: 12px;
+    align-items: center;
+    gap: 12px;
+}
+
+.photo-preview img {
+    width: 72px;
+    height: 72px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 2px solid var(--accent-color);
+}
+
+.text-btn {
+    border: 0;
+    background: transparent;
+    color: var(--secondary-color);
+    font: inherit;
+    font-weight: 650;
+    cursor: pointer;
+    text-decoration: underline;
 }
 
 .btn {
@@ -147,6 +174,13 @@ input[type="text"]:focus {
     pointer-events: none;
 }
 
+.process-note {
+    margin-top: 12px;
+    color: var(--muted-color);
+    font-size: 0.92em;
+    line-height: 1.4;
+}
+
 .status-message {
     margin-top: 15px;
     padding: 12px;
@@ -195,7 +229,7 @@ input[type="text"]:focus {
 }
 
 .preview-section.is-busy::after {
-    content: "Generando audio...";
+    content: "Generando vídeo...\AEsto puede tardar un rato";
     position: absolute;
     inset: 0;
     display: flex;
@@ -204,28 +238,40 @@ input[type="text"]:focus {
     background: rgba(255, 255, 255, 0.72);
     color: var(--secondary-color);
     font-weight: 700;
-    border-radius: 10px;
+    text-align: center;
+    white-space: pre-line;
+    border-radius: 8px;
     z-index: 3;
     pointer-events: auto;
 }
 
 .preview-section.is-busy .audio-container,
-.preview-section.is-busy .no-audio {
+.preview-section.is-busy .video-container,
+.preview-section.is-busy .no-audio,
+.preview-section.is-busy .no-media {
     pointer-events: none;
 }
 
-.audio-container {
+.audio-container,
+.video-container {
     display: flex;
     flex-direction: column;
     gap: 15px;
 }
 
-audio {
+audio,
+video {
     width: 100%;
     border-radius: 5px;
 }
 
-.no-audio {
+video {
+    aspect-ratio: 4 / 3;
+    background: #111;
+}
+
+.no-audio,
+.no-media {
     padding: 40px 20px;
     text-align: center;
     color: #999;

@@ -3,48 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lisa Hoy Es Tu Cumple - Audio personalizado</title>
-    <link rel="stylesheet" href="/style.css?v=4">
+    <title>Lisa Hoy Es Tu Cumple - Vídeo personalizado</title>
+    <link rel="stylesheet" href="/style.css?v=5">
 </head>
 <body>
     <div class="container">
         <header>
             <h1>Lisa Hoy Es Tu Cumple</h1>
-            <p>Cambia "Lisa" por el nombre que quieras y genera tu audio personalizado.</p>
+            <p>Cambia el nombre de la canción y, si quieres, pon una foto sobre la cara de Lisa.</p>
         </header>
 
         <main>
             <section class="form-section" aria-labelledby="formTitle">
-                <h2 id="formTitle">Crear audio</h2>
-                <form id="customizeForm">
+                <h2 id="formTitle">Crear vídeo</h2>
+                <form id="customizeForm" enctype="multipart/form-data">
                     <div class="form-group">
-                        <label for="customName">Nombre:</label>
+                        <label for="customName">Nombre</label>
                         <input
                             type="text"
                             id="customName"
                             name="customName"
-                            placeholder="Por ejemplo: Maria, Juan, Sofia..."
+                            placeholder="Por ejemplo: María, Juan, Sofía..."
                             required
                             maxlength="30"
                             autocomplete="given-name"
                         >
                     </div>
 
+                    <div class="form-group">
+                        <label for="photoInput">Foto opcional</label>
+                        <input
+                            type="file"
+                            id="photoInput"
+                            name="photo"
+                            accept="image/*"
+                        >
+                        <div id="photoPreview" class="photo-preview" style="display: none;">
+                            <img id="photoPreviewImage" alt="Vista previa de la foto">
+                            <button type="button" class="text-btn" id="clearPhotoBtn">Quitar foto</button>
+                        </div>
+                    </div>
+
                     <button type="submit" class="btn btn-primary" id="submitBtn">
-                        Generar audio personalizado
+                        Generar vídeo personalizado
                     </button>
+                    <p class="process-note">
+                        La generación puede tardar un rato. Si subes una foto, el vídeo puede necesitar alrededor de un minuto.
+                    </p>
                 </form>
 
                 <div id="statusMessage" class="status-message" role="status" aria-live="polite"></div>
             </section>
 
             <section class="preview-section" aria-labelledby="previewTitle">
-                <h2 id="previewTitle">Tu audio</h2>
-                <div id="audioContainer" class="audio-container" style="display: none;">
-                    <audio id="audioPlayer" controls>
-                        Tu navegador no soporta el reproductor de audio.
-                    </audio>
-                    <a id="downloadBtn" href="#" download="cumple-personalizado.mp3" class="btn btn-secondary">Descargar MP3</a>
+                <h2 id="previewTitle">Tu vídeo</h2>
+                <div id="videoContainer" class="video-container" style="display: none;">
+                    <video id="videoPlayer" controls playsinline>
+                        Tu navegador no soporta el reproductor de vídeo.
+                    </video>
+                    <a id="downloadBtn" href="#" download="cumple-personalizado.mp4" class="btn btn-secondary">Descargar MP4</a>
                 </div>
                 <div id="shareContainer" class="share-container" style="display: none;">
                     <p class="share-title">Compartir este resultado</p>
@@ -57,17 +74,17 @@
                     </div>
                     <p class="share-note" id="shareExpiry"></p>
                 </div>
-                <div id="noAudio" class="no-audio">
-                    <p>Aquí aparecerá tu audio personalizado.</p>
+                <div id="noVideo" class="no-media">
+                    <p>Aquí aparecerá tu vídeo personalizado.</p>
                 </div>
             </section>
         </main>
 
         <footer>
-            <p>&copy; 2026 Audio Customization App</p>
+            <p>&copy; 2026 Lisa Hoy Es Tu Cumple</p>
         </footer>
     </div>
 
-    <script src="/script.js?v=4"></script>
+    <script src="/script.js?v=5"></script>
 </body>
 </html>

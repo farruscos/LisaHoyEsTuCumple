@@ -1,0 +1,60 @@
+{
+  "version": 1,
+  "video": {
+    "width": 480,
+    "height": 360,
+    "duration": 62.58
+  },
+  "description": "Manual Lisa face track for the fixed source video. Coordinates are x/y/w/h boxes in source-video pixels.",
+  "segments": [
+    {
+      "label": "bed close-up",
+      "start": 16.65,
+      "end": 18.65,
+      "keyframes": [
+        { "time": 16.65, "x": 116, "y": 88, "w": 236, "h": 178 },
+        { "time": 17.25, "x": 110, "y": 86, "w": 244, "h": 184 },
+        { "time": 18.65, "x": 124, "y": 94, "w": 232, "h": 176 }
+      ]
+    },
+    {
+      "label": "bedroom side profile",
+      "start": 19.0,
+      "end": 23.35,
+      "keyframes": [
+        { "time": 19.0, "x": 351, "y": 101, "w": 118, "h": 138 },
+        { "time": 21.8, "x": 350, "y": 99, "w": 119, "h": 140 },
+        { "time": 23.35, "x": 351, "y": 101, "w": 116, "h": 136 }
+      ]
+    },
+    {
+      "label": "bed close-up smile",
+      "start": 44.0,
+      "end": 46.65,
+      "keyframes": [
+        { "time": 44.0, "x": 96, "y": 78, "w": 258, "h": 196 },
+        { "time": 45.5, "x": 96, "y": 78, "w": 260, "h": 198 },
+        { "time": 46.65, "x": 98, "y": 78, "w": 258, "h": 196 }
+      ]
+    },
+    {
+      "label": "final bedroom side profile",
+      "start": 55.0,
+      "end": 57.6,
+      "keyframes": [
+        { "time": 55.0, "x": 352, "y": 102, "w": 116, "h": 136 },
+        { "time": 56.2, "x": 352, "y": 103, "w": 116, "h": 136 },
+        { "time": 57.6, "x": 353, "y": 103, "w": 116, "h": 136 }
+      ]
+    },
+    {
+      "label": "final close-up",
+      "start": 57.75,
+      "end": 58.65,
+      "keyframes": [
+        { "time": 57.75, "x": 96, "y": 80, "w": 258, "h": 196 },
+        { "time": 58.65, "x": 96, "y": 80, "w": 258, "h": 196 }
+      ]
+    }
+  ]
+}

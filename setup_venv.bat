@@ -3,7 +3,7 @@ setlocal enabledelayedexpansion
 
 echo.
 echo ========================================
-echo Audio App - Environment Setup
+echo Lisa Video App - Environment Setup
 echo ========================================
 echo.
 
@@ -85,7 +85,7 @@ echo To activate the environment in the future, run:
 echo   venv\Scripts\activate.bat
 echo.
 echo To start the application:
-echo   python app.py
+echo   run_app.bat
 echo.
 echo Then open your browser to:
 echo   http://localhost:5000
