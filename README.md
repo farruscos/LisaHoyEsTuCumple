@@ -22,7 +22,7 @@ The original song/audio is not included in this repository. Add your own local `
 ## Windows Quick Start
 
 ```bat
-setup_venv_v2.bat
+setup_venv.bat
 ```
 
 Add `song.mp3` to the project root, or extract it from a local video:
@@ -65,7 +65,7 @@ LisaHoyEsTuCumple/
 │   └── style.css
 ├── extract_audio.py
 ├── run_app.bat
-├── setup_venv_v2.bat
+├── setup_venv.bat
 ├── requirements.txt
 └── README.md
 ```

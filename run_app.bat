@@ -12,7 +12,7 @@ cd /d "%~dp0"
 REM Check if venv exists
 if not exist venv (
     echo ERROR: Virtual environment not found!
-    echo Please run: setup_venv_v2.bat first
+    echo Please run: setup_venv.bat first
     echo.
     pause
     exit /b 1
