@@ -1,8 +1,13 @@
 #!/bin/bash
+set -e
+
 cd "$(dirname "$0")"
-python -m venv venv
+
+python3 -m venv venv
 source venv/bin/activate
-pip install -r requirements.txt
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+
 echo ""
 echo "Virtual environment created and dependencies installed!"
 echo "To activate the environment, run: source venv/bin/activate"

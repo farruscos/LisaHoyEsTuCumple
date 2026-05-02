@@ -32,7 +32,8 @@ class AudioProcessor:
             original_audio_path: Path to the original audio file.
             replacement_regions: List of (start_seconds, end_seconds) pairs.
         """
-        self.base_dir = os.path.dirname(os.path.abspath(__file__))
+        self.app_dir = os.path.dirname(os.path.abspath(__file__))
+        self.base_dir = os.path.dirname(self.app_dir)
         self.original_audio_path = self._resolve_audio_path(original_audio_path) if original_audio_path else self._get_default_audio()
         self.replacement_regions = replacement_regions or DEFAULT_REPLACEMENT_REGIONS
         self.audio_loaded = False

@@ -50,7 +50,24 @@ python -m venv venv
 venv\Scripts\activate.bat
 python -m pip install --upgrade pip
 pip install -r requirements.txt
-python app.py
+python src\app.py
+```
+
+## Project Structure
+
+```text
+LisaHoyEsTuCumple/
+├── src/
+│   ├── app.py
+│   ├── audio_processor.py
+│   ├── index.html
+│   ├── script.js
+│   └── style.css
+├── extract_audio.py
+├── run_app.bat
+├── setup_venv_v2.bat
+├── requirements.txt
+└── README.md
 ```
 
 ## Audio Files
@@ -66,7 +83,7 @@ That keeps the GitHub repository lightweight and avoids publishing copyrighted m
 
 ## Tune Replacement Timings
 
-Replacement windows are defined in `audio_processor.py`:
+Replacement windows are defined in `src/audio_processor.py`:
 
 ```python
 DEFAULT_REPLACEMENT_REGIONS = [
