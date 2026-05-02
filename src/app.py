@@ -25,9 +25,10 @@ except Exception as e:
 if not audio_ready:
     print("\n[Warning] Audio is not available!")
     print("Make sure to:")
-    print("  1. Set AUDIO_PATH to the audio file location")
-    print("  2. Or extract audio from video: python extract_audio.py")
-    print("  3. Or place song.mp3/song.wav in the project root")
+    print("  1. Set AUDIO_URL to a public audio URL")
+    print("  2. Or set AUDIO_PATH to the audio file location")
+    print("  3. Or extract audio from video: python extract_audio.py")
+    print("  4. Or place song.mp3/song.wav in the project root")
 
 print("="*60 + "\n")
 

@@ -3,6 +3,8 @@ import os
 import platform
 import subprocess
 import tempfile
+import urllib.error
+import urllib.request
 
 from gtts import gTTS
 
@@ -35,7 +37,15 @@ class AudioProcessor:
         self.app_dir = os.path.dirname(os.path.abspath(__file__))
         self.base_dir = os.path.dirname(self.app_dir)
         configured_audio_path = original_audio_path or os.environ.get("AUDIO_PATH")
-        self.original_audio_path = self._resolve_audio_path(configured_audio_path) if configured_audio_path else self._get_default_audio()
+        configured_audio_url = os.environ.get("AUDIO_URL")
+
+        if configured_audio_path:
+            self.original_audio_path = self._resolve_audio_path(configured_audio_path)
+        elif configured_audio_url:
+            self.original_audio_path = self._download_audio_from_url(configured_audio_url)
+        else:
+            self.original_audio_path = self._get_default_audio()
+
         self.replacement_regions = replacement_regions or DEFAULT_REPLACEMENT_REGIONS
         self.audio_loaded = False
         self.original_audio = None
@@ -46,6 +56,42 @@ class AudioProcessor:
         if os.path.isabs(audio_path):
             return audio_path
         return os.path.join(self.base_dir, audio_path)
+
+    def _download_audio_from_url(self, audio_url):
+        """Download source audio from a public URL and cache it locally."""
+        cache_path = os.environ.get(
+            "AUDIO_CACHE_PATH",
+            os.path.join(tempfile.gettempdir(), "lisa_source_audio.mp3"),
+        )
+
+        if os.path.exists(cache_path) and os.path.getsize(cache_path) > 0:
+            size_mb = os.path.getsize(cache_path) / (1024 * 1024)
+            print(f"[Info] Using cached source audio: {cache_path} ({size_mb:.2f} MB)")
+            return cache_path
+
+        print("[Info] Downloading source audio from AUDIO_URL...")
+        try:
+            request = urllib.request.Request(
+                audio_url,
+                headers={"User-Agent": "LisaHoyEsTuCumple/1.0"},
+            )
+            with urllib.request.urlopen(request, timeout=120) as response:
+                status = getattr(response, "status", None)
+                if status is not None and status >= 400:
+                    raise RuntimeError(f"HTTP {status}")
+
+                with open(cache_path, "wb") as output_file:
+                    output_file.write(response.read())
+
+            size_mb = os.path.getsize(cache_path) / (1024 * 1024)
+            if size_mb <= 0:
+                raise RuntimeError("downloaded audio file is empty")
+
+            print(f"[Success] Source audio downloaded: {cache_path} ({size_mb:.2f} MB)")
+            return cache_path
+        except (urllib.error.URLError, OSError, RuntimeError) as exc:
+            print(f"[Error] Failed to download AUDIO_URL: {exc}")
+            return cache_path
 
     def _get_default_audio(self):
         """Get the default audio file path, extracting it from video if needed."""
