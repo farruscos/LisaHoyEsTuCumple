@@ -1,8 +1,8 @@
 # Lisa Hoy Es Tu Cumple - Name Replacer
 
-Small Flask web app that generates a personalized version of a local audio file by replacing the hard-coded "Lisa" moments with a name entered by the user.
+Small Flask web app that generates a personalized birthday audio by replacing fixed "Lisa" moments with a name entered by the user.
 
-The original song/audio is not included in this repository. Add your own local `song.mp3` or place a compatible video file in the project folder and run the extraction script.
+The original song/audio is not included in this repository. Add your own local `song.mp3`, set `AUDIO_PATH`, or place a compatible video file in the project folder and run the extraction script.
 
 ## Features
 
@@ -53,6 +53,52 @@ pip install -r requirements.txt
 python src\app.py
 ```
 
+## Docker
+
+The Docker image includes FFmpeg and runs the Flask app with Gunicorn.
+
+```bash
+docker build -t lisa-name-replacer .
+docker run --rm -p 10000:10000 -v "%cd%/song.mp3:/var/data/song.mp3" lisa-name-replacer
+```
+
+Then open:
+
+```text
+http://localhost:10000
+```
+
+## Render Deployment
+
+Render can deploy this repository as a Docker web service and provide a public `onrender.com` URL.
+
+Recommended setup:
+
+1. Create a Render **Web Service** from this GitHub repository.
+2. Select **Docker** as the runtime.
+3. Add a persistent disk.
+4. Mount the disk at:
+
+   ```text
+   /var/data
+   ```
+
+5. Upload your local audio file to the disk as:
+
+   ```text
+   /var/data/song.mp3
+   ```
+
+6. Set this environment variable:
+
+   ```text
+   AUDIO_PATH=/var/data/song.mp3
+   ```
+
+The Dockerfile already sets `AUDIO_PATH=/var/data/song.mp3` by default, but defining it explicitly in Render makes the deployment intent clear.
+
+Do not upload copyrighted audio to GitHub. Keep the source audio on Render's disk or use audio that you have permission to publish.
+
 ## Project Structure
 
 ```text
@@ -63,6 +109,7 @@ LisaHoyEsTuCumple/
 │   ├── index.html
 │   ├── script.js
 │   └── style.css
+├── Dockerfile
 ├── extract_audio.py
 ├── run_app.bat
 ├── setup_venv.bat
@@ -96,4 +143,4 @@ Each pair is `(start_seconds, end_seconds)`.
 
 ## Notes
 
-This is a Flask app, so GitHub Pages cannot run the backend. Use GitHub for source hosting; deploy the backend separately if you want a public live app.
+GitHub Pages cannot run this app because audio generation requires the Flask backend. Use GitHub for source hosting and deploy the backend on a service such as Render.

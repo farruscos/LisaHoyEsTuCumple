@@ -25,8 +25,9 @@ except Exception as e:
 if not audio_ready:
     print("\n[Warning] Audio is not available!")
     print("Make sure to:")
-    print("  1. Extract audio from video: python extract_audio.py")
-    print("  2. Or place song.mp3/song.wav in the project root")
+    print("  1. Set AUDIO_PATH to the audio file location")
+    print("  2. Or extract audio from video: python extract_audio.py")
+    print("  3. Or place song.mp3/song.wav in the project root")
 
 print("="*60 + "\n")
 
@@ -96,7 +97,8 @@ def health():
     return jsonify({'status': 'ok', 'message': 'Audio API is running'}), 200
 
 if __name__ == '__main__':
-    print("\nStarting Flask server on http://localhost:5000")
-    print("Frontend available at: http://localhost:5000")
+    port = int(os.environ.get("PORT", "5000"))
+    print(f"\nStarting Flask server on http://localhost:{port}")
+    print(f"Frontend available at: http://localhost:{port}")
     print("Press Ctrl+C to stop\n")
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True, host='0.0.0.0', port=port)

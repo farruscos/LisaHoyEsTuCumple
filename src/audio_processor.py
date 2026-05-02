@@ -34,7 +34,8 @@ class AudioProcessor:
         """
         self.app_dir = os.path.dirname(os.path.abspath(__file__))
         self.base_dir = os.path.dirname(self.app_dir)
-        self.original_audio_path = self._resolve_audio_path(original_audio_path) if original_audio_path else self._get_default_audio()
+        configured_audio_path = original_audio_path or os.environ.get("AUDIO_PATH")
+        self.original_audio_path = self._resolve_audio_path(configured_audio_path) if configured_audio_path else self._get_default_audio()
         self.replacement_regions = replacement_regions or DEFAULT_REPLACEMENT_REGIONS
         self.audio_loaded = False
         self.original_audio = None
