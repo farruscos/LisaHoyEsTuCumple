@@ -105,7 +105,6 @@ class ShareStorage:
             CacheControl="private, max-age=86400",
             Metadata={
                 "expires_at": expires_at.isoformat(),
-                "custom_name": custom_name[:80],
             },
         )
 
