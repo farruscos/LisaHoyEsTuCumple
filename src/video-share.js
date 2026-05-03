@@ -10,9 +10,13 @@ const whatsappShareBtn = document.getElementById('sharedWhatsappShareBtn');
 const xShareBtn = document.getElementById('sharedXShareBtn');
 const facebookShareBtn = document.getElementById('sharedFacebookShareBtn');
 const expiryText = document.getElementById('sharedExpiry');
+const brandTitleBox = document.getElementById('sharedBrandTitle');
+const titleBox = document.getElementById('sharedTitle');
+const descriptionBox = document.getElementById('sharedDescription');
 
 let currentShareUrl = window.location.href;
-const shareText = 'Mira este vídeo personalizado de cumpleaños.';
+let shareTitle = document.title || 'Lisa Hoy Es Tu Cumple';
+let shareText = descriptionBox?.textContent || 'Mira este vídeo personalizado de cumpleaños.';
 
 loadSharedVideo();
 
@@ -23,7 +27,7 @@ nativeShareBtn.addEventListener('click', async () => {
 
     try {
         await navigator.share({
-            title: 'Lisa Hoy Es Tu Cumple',
+            title: shareTitle,
             text: shareText,
             url: currentShareUrl,
         });
@@ -57,6 +61,8 @@ async function loadSharedVideo() {
         const payload = await response.json();
         currentShareUrl = payload.share_url;
 
+        updateShareCopy(payload.custom_name);
+
         videoPlayer.src = payload.video_url;
         downloadBtn.href = `${payload.video_url}?download=1`;
         downloadBtn.download = 'cumple-personalizado.mp4';
@@ -66,6 +72,29 @@ async function loadSharedVideo() {
         showStatus('Vídeo listo para reproducir.', 'success');
     } catch (error) {
         showStatus(error.message, 'error');
+    }
+}
+
+function updateShareCopy(customName) {
+    if (!customName) {
+        return;
+    }
+
+    const brandTitle = `${customName} Hoy Es Tu Cumple`;
+    shareTitle = brandTitle;
+    shareText = `Han creado este vídeo personalizado de cumpleaños para ${customName}.`;
+    document.title = shareTitle;
+
+    if (brandTitleBox) {
+        brandTitleBox.textContent = brandTitle;
+    }
+
+    if (titleBox) {
+        titleBox.textContent = `Vídeo para ${customName}`;
+    }
+
+    if (descriptionBox) {
+        descriptionBox.textContent = shareText;
     }
 }
 

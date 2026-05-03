@@ -3,19 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vídeo personalizado - Lisa Hoy Es Tu Cumple</title>
+    <title>{{ page_title|default('Vídeo personalizado - Lisa Hoy Es Tu Cumple') }}</title>
+    <meta name="description" content="{{ page_description|default('Alguien ha creado este vídeo personalizado para compartirlo contigo.') }}">
+    <meta property="og:title" content="{{ page_title|default('Vídeo personalizado - Lisa Hoy Es Tu Cumple') }}">
+    <meta property="og:description" content="{{ page_description|default('Alguien ha creado este vídeo personalizado para compartirlo contigo.') }}">
+    <meta property="og:type" content="video.other">
+    <meta property="og:url" content="{{ share_url|default('') }}">
+    <meta property="og:video" content="{{ video_url|default('') }}">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="{{ page_title|default('Vídeo personalizado - Lisa Hoy Es Tu Cumple') }}">
+    <meta name="twitter:description" content="{{ page_description|default('Alguien ha creado este vídeo personalizado para compartirlo contigo.') }}">
     <link rel="stylesheet" href="/style.css?v=5">
 </head>
-<body>
+<body data-custom-name="{{ custom_name|default('') }}">
     <div class="container">
         <header>
-            <h1>Lisa Hoy Es Tu Cumple</h1>
-            <p>Alguien ha creado este vídeo personalizado para compartirlo contigo.</p>
+            <h1 id="sharedBrandTitle">{{ page_brand|default('Lisa Hoy Es Tu Cumple') }}</h1>
+            <p id="sharedDescription">{{ page_description|default('Alguien ha creado este vídeo personalizado para compartirlo contigo.') }}</p>
         </header>
 
         <main class="shared-main">
             <section class="preview-section shared-card" aria-labelledby="sharedTitle">
-                <h2 id="sharedTitle">Vídeo personalizado</h2>
+                <h2 id="sharedTitle">{{ page_heading|default('Vídeo personalizado') }}</h2>
                 <div id="sharedStatus" class="status-message show loading" role="status" aria-live="polite">
                     Cargando vídeo...
                 </div>

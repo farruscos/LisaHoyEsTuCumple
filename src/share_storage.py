@@ -1,3 +1,4 @@
+import base64
 import os
 import secrets
 from datetime import datetime, timedelta, timezone
@@ -35,6 +36,21 @@ def parse_share_expiry(share_id):
 def is_share_expired(share_id):
     expires_at = parse_share_expiry(share_id)
     return expires_at is None or utc_now() > expires_at
+
+
+def encode_metadata_text(value):
+    if not value:
+        return ""
+    return base64.urlsafe_b64encode(value.encode("utf-8")).decode("ascii")
+
+
+def decode_metadata_text(value):
+    if not value:
+        return ""
+    try:
+        return base64.urlsafe_b64decode(value.encode("ascii")).decode("utf-8")
+    except (ValueError, UnicodeDecodeError):
+        return ""
 
 
 class ShareStorage:
@@ -105,8 +121,22 @@ class ShareStorage:
             CacheControl="private, max-age=86400",
             Metadata={
                 "expires_at": expires_at.isoformat(),
+                "custom_name_b64": encode_metadata_text(custom_name),
             },
         )
+
+    def get_video_metadata(self, share_id):
+        try:
+            response = self.client.head_object(
+                Bucket=self.bucket,
+                Key=self.video_object_key(share_id),
+            )
+            return response.get("Metadata", {})
+        except (BotoCoreError, ClientError) as exc:
+            raise FileNotFoundError(str(exc)) from exc
+
+    def get_custom_name(self, metadata):
+        return decode_metadata_text(metadata.get("custom_name_b64"))
 
     def get_video(self, share_id):
         try:

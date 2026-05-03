@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_file, send_from_directory
+from flask import Flask, request, jsonify, send_file, send_from_directory, render_template_string
 from flask_cors import CORS
 from werkzeug.middleware.proxy_fix import ProxyFix
 import os
@@ -92,6 +92,23 @@ def validate_custom_name(custom_name):
         return None
     return custom_name
 
+
+def video_share_copy(custom_name=None):
+    if custom_name:
+        return {
+            "brand": f"{custom_name} Hoy Es Tu Cumple",
+            "title": f"{custom_name} Hoy Es Tu Cumple",
+            "description": f"Han creado este vídeo personalizado de cumpleaños para {custom_name}.",
+            "heading": f"Vídeo para {custom_name}",
+        }
+
+    return {
+        "brand": "Lisa Hoy Es Tu Cumple",
+        "title": "Vídeo personalizado - Lisa Hoy Es Tu Cumple",
+        "description": "Alguien ha creado este vídeo personalizado para compartirlo contigo.",
+        "heading": "Vídeo personalizado",
+    }
+
 @app.route('/', methods=['GET'])
 def index():
     """Serve the web app."""
@@ -125,7 +142,28 @@ def shared_audio_page(share_id):
 @app.route('/v/<share_id>', methods=['GET'])
 def shared_video_page(share_id):
     """Serve the public shared-video page."""
-    return send_from_directory(BASE_DIR, 'video-share.html')
+    custom_name = None
+    if share_storage and not is_share_expired(share_id):
+        try:
+            metadata = share_storage.get_video_metadata(share_id)
+            custom_name = share_storage.get_custom_name(metadata)
+        except FileNotFoundError:
+            custom_name = None
+
+    copy = video_share_copy(custom_name)
+    with open(os.path.join(BASE_DIR, 'video-share.html'), encoding='utf-8') as template_file:
+        template = template_file.read()
+
+    return render_template_string(
+        template,
+        page_brand=copy["brand"],
+        page_title=copy["title"],
+        page_description=copy["description"],
+        page_heading=copy["heading"],
+        custom_name=custom_name or "",
+        share_url=public_url(f'/v/{share_id}'),
+        video_url=public_url(f'/v/{share_id}/video'),
+    )
 
 @app.route('/api/share/<share_id>', methods=['GET'])
 def share_status(share_id):
@@ -176,11 +214,18 @@ def video_status(share_id):
     if expires_at is None or is_share_expired(share_id):
         return jsonify({'error': 'Este enlace ha caducado'}), 410
 
+    try:
+        metadata = share_storage.get_video_metadata(share_id)
+        custom_name = share_storage.get_custom_name(metadata)
+    except FileNotFoundError:
+        return jsonify({'error': 'Vídeo no encontrado'}), 404
+
     return jsonify({
         'share_id': share_id,
         'share_url': public_url(f'/v/{share_id}'),
         'video_url': public_url(f'/v/{share_id}/video'),
         'expires_at': expires_at.isoformat(),
+        'custom_name': custom_name,
     })
 
 @app.route('/v/<share_id>/video', methods=['GET'])
